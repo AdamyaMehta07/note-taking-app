@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ShareType {
+  ONE_TIME
+  TIME_BASED
+}
+
+enum AccessType {
+  PUBLIC
+  PASSWORD
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String   // bcrypt hash, never plaintext
+  notes     Note[]
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id        String      @id @default(cuid())
+  title     String
+  content   String
+  owner     User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId   String
+  shareLink ShareLink?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([ownerId])
+}
+
+model ShareLink {
+  id         String     @id @default(cuid())
+  token      String     @unique // random, unguessable string used in the /share/[token] URL
+  note       Note       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  noteId     String     @unique // one active share link per note (creating a new one replaces the old)
+
+  shareType  ShareType
+  accessType AccessType
+
+  // Only set when accessType = PASSWORD. This is the bcrypt HASH of the
+  // auto-generated access key, never the plaintext key itself.
+  passwordHash String?
+
+  // Only meaningful for TIME_BASED links. Null for ONE_TIME links
+  // (their "expiry" is the `used` flag instead).
+  expiresAt  DateTime?
+
+  // Flips to true the instant a ONE_TIME link is successfully consumed.
+  // The atomic compare-and-swap update on this column is what prevents
+  // two simultaneous requests from both succeeding (see README).
+  used       Boolean    @default(false)
+
+  // Owner can force-kill a link early. Checked before every access.
+  revoked    Boolean    @default(false)
+
+  // Only successful views/unlocks increment this (never wrong passwords).
+  viewCount  Int        @default(0)
+
+  createdAt  DateTime   @default(now())
+
+  accessLogs AccessLog[]
+
+  @@index([token])
+}
+
+// Immutable audit trail of every access attempt (success or failure).
+// Used to show a history and to help reason about abuse / brute force.
+model AccessLog {
+  id          String    @id @default(cuid())
+  shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
+  shareLinkId String
+  success     Boolean
+  reason      String    // e.g. "PUBLIC_VIEW", "PASSWORD_OK", "WRONG_PASSWORD", "EXPIRED", "REVOKED", "ALREADY_USED"
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([shareLinkId])
+}
