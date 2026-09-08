@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,8 +33,9 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/notes/new");
-    router.refresh(); // re-renders the Navbar so it picks up the new session
+    // Full page reload (not router.push) so the Navbar, which only checks
+    // the session once on mount, re-checks it and picks up the new cookie.
+    window.location.href = "/notes/new";
   }
 
   return (

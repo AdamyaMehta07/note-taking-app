@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
-  const router = useRouter();
   const [email, setEmail] = useState<string | null | undefined>(undefined); // undefined = still loading
 
   useEffect(() => {
@@ -18,15 +16,14 @@ export function Navbar() {
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
+    window.location.href = "/login";
   }
 
   return (
     <header className="border-b border-neutral-200 bg-black text-white">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
         <Link href="/" className="text-lg font-bold">
-          Notes <span className="text-orange-500">Taking App</span>
+          Note<span className="text-orange-500">Share</span>
         </Link>
 
         <nav className="flex items-center gap-3">
