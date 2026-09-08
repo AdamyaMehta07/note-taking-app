@@ -121,4 +121,8 @@ right now every failed attempt gets logged with a reason and a timestamp in Acce
 
 ## Test Credentials
 
-(will add the test account email/password here before recording the demo)
+   Email: test@example.com
+   Password: test1234
+
+
+  **Live Demo:** https://note-taking-app-one-green.vercel.app/
