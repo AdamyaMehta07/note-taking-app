@@ -86,6 +86,20 @@ export default function NewNotePage() {
     setResult(data);
   }
 
+  function startNewNote() {
+    // We don't navigate here on purpose. We're already on /notes/new, and
+    // Next.js treats a Link to the current route as a no-op - nothing would
+    // happen if we used <Link href="/notes/new">. Resetting state locally
+    // works regardless of what route we're on.
+    setResult(null);
+    setTitle("");
+    setContent("");
+    setShareType("ONE_TIME");
+    setAccessType("PUBLIC");
+    setExpiresAt("");
+    setError(null);
+  }
+
   function copyLink() {
     if (!result) return;
     navigator.clipboard.writeText(result.shareLink.url);
@@ -141,11 +155,9 @@ export default function NewNotePage() {
                   View Note Details
                 </Button>
               </Link>
-              <Link href="/notes/new" className="flex-1">
-                <Button className="w-full" variant="outline">
-                  Create Another
-                </Button>
-              </Link>
+              <Button className="flex-1" variant="outline" onClick={startNewNote}>
+                Create Another
+              </Button>
             </div>
           </CardContent>
         </Card>

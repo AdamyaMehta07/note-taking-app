@@ -30,11 +30,18 @@ export function Navbar() {
           {email === undefined ? null : email ? (
             <>
               <span className="hidden text-sm text-neutral-300 sm:inline">{email}</span>
-              <Link href="/notes/new">
-                <Button variant="accent" size="sm">
-                  New Note
-                </Button>
-              </Link>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={() => {
+                  // A plain <Link> here would do nothing if we're already on
+                  // /notes/new (Next.js skips navigating to the current
+                  // route). A hard navigation always works, from any page.
+                  window.location.href = "/notes/new";
+                }}
+              >
+                New Note
+              </Button>
               <Button variant="outline" size="sm" className="bg-transparent text-white hover:bg-neutral-800" onClick={handleLogout}>
                 Logout
               </Button>
